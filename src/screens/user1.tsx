@@ -191,7 +191,7 @@ export function Runner() {
   return (
     <Screen>
       <Header title={run.title} sub={(paused ? 'Paused · ' : '') + mm(elapsed)} onBack={() => { toast('Workout saved as a draft. Resume it any time.', 'info'); nav.pop(); }} right={<Pressable onPress={() => { paused ? W.resumeRun(run, Date.now()) : W.pauseRun(run, Date.now()); save(run); }} accessibilityLabel={paused ? 'Resume' : 'Pause'} style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: t.surface, alignItems: 'center', justifyContent: 'center' }}><Icon name={paused ? 'play' : 'pause'} color={t.accentText} /></Pressable>} />
-      <View style={{ height: 6, borderRadius: 3, backgroundColor: t.surface2, overflow: 'hidden' }}><View style={{ width: (totalSets ? (doneSets / totalSets) * 100 : 0) + '%', height: 6, backgroundColor: t.accent }} /></View>
+      <View style={{ height: 6, borderRadius: 3, backgroundColor: t.surface2, overflow: 'hidden' }}><View style={{ width: ((totalSets ? (doneSets / totalSets) * 100 : 0) + '%') as any, height: 6, backgroundColor: t.accent }} /></View>
       <Gap />
       <Row wrap>{run.exercises.map((x, i) => <Pressable key={i} onPress={() => setEi(i)} accessibilityLabel={'Exercise ' + (i + 1)} style={{ width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', backgroundColor: i === ei ? t.accent : x.skipped ? t.surface2 : x.sets.every((s) => s.done) ? t.good + '44' : t.surface, borderWidth: 1, borderColor: t.border }}><Txt v="small" style={{ fontWeight: '800', color: i === ei ? t.onAccent : t.text }}>{i + 1}</Txt></Pressable>)}</Row>
       <Gap />

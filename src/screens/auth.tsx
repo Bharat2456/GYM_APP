@@ -86,7 +86,7 @@ export function Onboarding({ editing, onDone }: { editing?: boolean; onDone?: ()
   return (
     <Screen>
       <Header title={titles[step]} sub={'Step ' + (step + 1) + ' of 6'} onBack={step > 0 ? () => setStep(step - 1) : editing ? onDone : undefined} />
-      <View style={{ height: 6, borderRadius: 3, backgroundColor: '#8883', overflow: 'hidden', marginBottom: 20 }}><View style={{ width: ((step + 1) / 6) * 100 + '%', height: 6, backgroundColor: '#C6F432' }} /></View>
+      <View style={{ height: 6, borderRadius: 3, backgroundColor: '#8883', overflow: 'hidden', marginBottom: 20 }}><View style={{ width: (((step + 1) / 6) * 100 + '%') as any, height: 6, backgroundColor: '#C6F432' }} /></View>
       <View style={{ gap: 14 }}>
         {step === 0 && <>
           <Field label="First name" value={f.name} onChangeText={(v) => set('name', v)} autoCap="words" />

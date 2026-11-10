@@ -176,7 +176,7 @@ export function LineChart({ points, height = 120, width = 320, unit = '' }: { po
 }
 export function MacroBar({ label, value, target, color, unit = 'g' }: { label: string; value: number; target?: number; color?: string; unit?: string }) {
   const t = useTheme(); const pct = target ? Math.min(1, value / target) : 0;
-  return <View style={{ gap: 4 }}><Row between><Txt v="small" c="sub">{label}</Txt><Txt v="small">{Math.round(value)}{target ? ' / ' + Math.round(target) : ''} {unit}</Txt></Row><View style={{ height: 8, borderRadius: 4, backgroundColor: t.surface2, overflow: 'hidden' }}><View style={{ width: pct * 100 + '%', height: 8, backgroundColor: color || t.accent, borderRadius: 4 }} /></View></View>;
+  return <View style={{ gap: 4 }}><Row between><Txt v="small" c="sub">{label}</Txt><Txt v="small">{Math.round(value)}{target ? ' / ' + Math.round(target) : ''} {unit}</Txt></Row><View style={{ height: 8, borderRadius: 4, backgroundColor: t.surface2, overflow: 'hidden' }}><View style={{ width: (pct * 100 + '%') as any, height: 8, backgroundColor: color || t.accent, borderRadius: 4 }} /></View></View>;
 }
 export class ErrorBoundary extends React.Component<{ children: ReactNode; onReset?: () => void }, { err: Error | null }> {
   state = { err: null as Error | null };
