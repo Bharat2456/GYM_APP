@@ -1,0 +1,11 @@
+node_modules/
+.expo/
+android/
+ios/
+.testbuild/
+*.apk
+*.aab
+*.keystore
+*.jks
+assets/models/*.tflite
+.env*

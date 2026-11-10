@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "Kinetic Coach",
+    "slug": "kinetic-coach",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": false,
+    "splash": { "image": "./assets/splash.png", "resizeMode": "contain", "backgroundColor": "#0B0B0C" },
+    "android": {
+      "package": "com.bharatwagh.kineticcoach",
+      "versionCode": 1,
+      "adaptiveIcon": { "foregroundImage": "./assets/adaptive-icon.png", "backgroundColor": "#0B0B0C" },
+      "permissions": ["android.permission.CAMERA", "android.permission.POST_NOTIFICATIONS"],
+      "allowBackup": false
+    },
+    "plugins": [
+      ["react-native-vision-camera", { "cameraPermissionText": "Kinetic Coach uses the camera to count reps and check your form on this device. Nothing is recorded or uploaded.", "enableMicrophonePermission": false }],
+      ["expo-build-properties", { "android": { "minSdkVersion": 26, "compileSdkVersion": 35, "targetSdkVersion": 34 } }],
+      "expo-notifications",
+      ["expo-image-picker", { "cameraPermission": "Used only to photograph a meal so its calories can be estimated, if you add an AI key." }],
+      "expo-secure-store"
+    ]
+  }
+}

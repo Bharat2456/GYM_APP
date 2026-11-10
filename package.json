@@ -1,0 +1,46 @@
+{
+  "name": "kinetic-coach",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.ts",
+  "description": "Kinetic Coach: native Android fitness + gym management demo (React Native / Expo / SQLite).",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "prebuild": "expo prebuild --platform android --no-install",
+    "fetch-model": "bash scripts/fetch-model.sh",
+    "typecheck": "tsc --noEmit",
+    "test": "node scripts/run-tests.cjs",
+    "verify": "npm run typecheck && npm test",
+    "build:debug": "npm run fetch-model && npm run prebuild && cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "expo": "~52.0.46",
+    "expo-asset": "~11.0.5",
+    "expo-build-properties": "~0.13.2",
+    "expo-clipboard": "~7.0.1",
+    "expo-document-picker": "~13.0.3",
+    "expo-file-system": "~18.0.12",
+    "expo-image-picker": "~16.0.6",
+    "expo-notifications": "~0.29.14",
+    "expo-secure-store": "~14.0.1",
+    "expo-sharing": "~13.0.1",
+    "expo-sqlite": "~15.1.4",
+    "expo-status-bar": "~2.0.1",
+    "react": "18.3.1",
+    "react-native": "0.76.9",
+    "react-native-fast-tflite": "^1.5.0",
+    "react-native-qrcode-svg": "^6.3.15",
+    "react-native-safe-area-context": "4.12.0",
+    "react-native-svg": "15.8.0",
+    "react-native-vision-camera": "^4.6.4",
+    "react-native-worklets-core": "^1.5.0",
+    "vision-camera-resize-plugin": "^3.1.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@types/react": "~18.3.12",
+    "esbuild": "^0.24.0",
+    "typescript": "~5.3.3"
+  }
+}

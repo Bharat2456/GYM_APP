@@ -1,0 +1,50 @@
+import { Repo, Actor, SYSTEM } from '../db/repo';
+import { uid } from '../engine';
+
+/** Provider interface: swap DemoProvider for FitnessPay or another authorised gateway later without touching gym/customer modules. */
+export interface ChargeRequest { amount: number; currency: string; description: string; customerId: string; gymId: string; kind: TxnKind; idempotencyKey: string }
+export interface ChargeResult { ok: boolean; providerRef: string; status: 'succeeded' | 'failed'; message?: string }
+export interface PaymentProvider { readonly name: string; readonly demo: boolean; charge(r: ChargeRequest): ChargeResult; refund(providerRef: string, amount: number): { ok: boolean; providerRef: string } }
+export const DemoProvider: PaymentProvider = {
+  name: 'demo', demo: true,
+  charge: (r) => (r.amount < 0 || !isFinite(r.amount) ? { ok: false, providerRef: '', status: 'failed', message: 'Invalid amount' } : { ok: true, providerRef: 'DEMO-' + r.idempotencyKey.slice(-8).toUpperCase(), status: 'succeeded' }),
+  refund: (ref) => ({ ok: true, providerRef: 'REF-' + ref })
+};
+
+export type TxnKind = 'membership' | 'renewal' | 'saas_subscription';
+export type TxnStatus = 'succeeded' | 'refunded' | 'failed';
+export interface Txn { id: string; gymId: string; ownerId: string; kind: TxnKind; packageId?: string; description: string; amount: number; currency: 'INR'; status: TxnStatus; demo: true; provider: string; providerRef: string; invoiceNo: string; referralId?: string; commission?: { pct: number; amount: number }; refundedAt?: number; memberId?: string; at: number }
+
+export const DEFAULT_COMMISSION_PCT = 10;
+export const commissionPct = (repo: Repo): number => { const v = repo.getKV(SYSTEM, 'platform', 'referral.commissionPct', DEFAULT_COMMISSION_PCT); return typeof v === 'number' ? v : DEFAULT_COMMISSION_PCT; };
+export const calcCommission = (amount: number, pct: number) => Math.round(amount * pct) / 100;
+
+let provider: PaymentProvider = DemoProvider;
+export const setProvider = (p: PaymentProvider) => { provider = p; };
+
+function invoiceNo(repo: Repo): string {
+  const n = (repo.db.get<{ n: number }>('SELECT COUNT(*) n FROM docs WHERE collection=?', ['gym_txn'])?.n || 0) + 1;
+  return 'DEMO-INV-' + new Date(repo.now()).getFullYear() + '-' + String(n).padStart(5, '0');
+}
+/** Records a DEMO charge. Never touches real money; every record is flagged demo:true. */
+export function charge(repo: Repo, a: Actor, o: { gymId: string; customerId: string; kind: TxnKind; amount: number; description: string; packageId?: string; memberId?: string; referralId?: string }): Txn {
+  const id = uid('txn');
+  const res = provider.charge({ amount: o.amount, currency: 'INR', description: o.description, customerId: o.customerId, gymId: o.gymId, kind: o.kind, idempotencyKey: id });
+  const pct = commissionPct(repo);
+  const t: Txn = { id, gymId: o.gymId, ownerId: o.customerId, kind: o.kind, packageId: o.packageId, description: o.description, amount: o.amount, currency: 'INR', status: res.status, demo: true, provider: provider.name, providerRef: res.providerRef, invoiceNo: invoiceNo(repo), memberId: o.memberId, at: repo.now() };
+  if (res.ok && o.referralId && o.kind !== 'saas_subscription') { t.referralId = o.referralId; t.commission = { pct, amount: calcCommission(o.amount, pct) }; }
+  repo.put(a, 'gym_txn', t as any);
+  return t;
+}
+export function refund(repo: Repo, a: Actor, txnId: string): Txn {
+  const t = repo.get(a, 'gym_txn', txnId) as unknown as Txn | undefined; if (!t) throw new Error('Transaction not found');
+  if (t.status !== 'succeeded') throw new Error('Only successful transactions can be refunded.');
+  provider.refund(t.providerRef, t.amount);
+  const next = { ...t, status: 'refunded' as TxnStatus, refundedAt: repo.now(), commission: t.commission ? { ...t.commission, amount: 0 } : undefined };
+  return repo.put(a, 'gym_txn', next as any) as unknown as Txn;
+}
+export const listTxns = (repo: Repo, a: Actor, gymId?: string) => repo.list(a, 'gym_txn', { gymId, newest: true }) as unknown as Txn[];
+export function revenue(txns: Txn[]) { const ok = txns.filter((t) => t.status === 'succeeded' && t.kind !== 'saas_subscription'); return { gross: ok.reduce((s, t) => s + t.amount, 0), refunded: txns.filter((t) => t.status === 'refunded').reduce((s, t) => s + t.amount, 0), commission: ok.reduce((s, t) => s + (t.commission?.amount || 0), 0), count: ok.length }; }
+export function invoiceText(t: Txn, gymName: string, customerName: string): string {
+  return ['*** DEMO INVOICE: NO REAL MONEY WAS CHARGED ***', '', 'Invoice: ' + t.invoiceNo, 'Date: ' + new Date(t.at).toDateString(), 'Gym: ' + gymName, 'Customer: ' + customerName, '', t.description, 'Amount: INR ' + t.amount.toFixed(2) + ' (' + t.status.toUpperCase() + ')', 'Provider ref: ' + t.providerRef, t.commission ? 'Referral commission (' + t.commission.pct + '%): INR ' + t.commission.amount.toFixed(2) : '', '', 'Demo transaction generated by the Kinetic Coach prototype.'].filter((x) => x !== undefined).join('\n');
+}
