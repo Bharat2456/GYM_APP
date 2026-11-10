@@ -58,8 +58,8 @@ npm install
 npm run fetch-model       # downloads the pose model (needs internet) into assets/models/
 npm run verify            # type check + tests
 npx expo prebuild --platform android
-cd android && ./gradlew assembleDebug
-# APK: android/app/build/outputs/apk/debug/app-debug.apk
+cd android && ./gradlew assembleRelease
+# APK: android/app/build/outputs/apk/release/app-release.apk (JS bundle embedded; runs without a PC)
 ```
 
 The camera and TFLite modules are native, so **Expo Go will not work**. Use a development build (`npx expo run:android` with a phone or emulator attached) or the APK.
@@ -73,13 +73,15 @@ The camera and TFLite modules are native, so **Expo Go will not work**. Use a de
    git remote add origin https://github.com/<you>/kinetic-coach.git
    git push -u origin main
    ```
-2. Open the repository's **Actions** tab. The *Android debug build* workflow starts on every push to `main`, on pull requests, and manually (**Run workflow**).
-3. When it finishes, open the run and download the **kinetic-coach-debug-apk** artifact (a zip containing the `.apk`).
+2. Open the repository's **Actions** tab. The *Android APK build* workflow starts on every push to `main`, on pull requests, and manually (**Run workflow**).
+3. When it finishes, open the run and download the **kinetic-coach-apk** artifact (a zip containing the `.apk`).
 4. On the phone, allow installs from your file manager or browser, then open the APK.
 
 For a signed release APK, add the four secrets listed at the top of `.github/workflows/android-release.yml` and run *Android signed release* manually.
 
 ## Troubleshooting
+
+- **"Could not connect to development server" / "Unable to load script".** You installed a plain debug APK, which needs Metro running on a PC. Use the APK from this repo's workflow (release variant, JavaScript bundled inside).
 
 - **Workflow fails at "Download pose model".** The model host may have changed. Download any MoveNet *SinglePose Lightning* `.tflite` and commit it as `assets/models/movenet_lightning.tflite` (remove that line from `.gitignore`), or fix the URL in `scripts/fetch-model.sh`.
 - **Workflow fails at "Type check".** The type check could not be run against the real React Native typings in the authoring environment. Open the failing step's log; the errors are normally one-line fixes.

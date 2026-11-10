@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit",
     "test": "node scripts/run-tests.cjs",
     "verify": "npm run typecheck && npm test",
-    "build:debug": "npm run fetch-model && npm run prebuild && cd android && ./gradlew assembleDebug"
+    "build:apk": "npm run fetch-model && npm run prebuild && cd android && ./gradlew assembleRelease"
   },
   "dependencies": {
     "expo": "~52.0.46",
